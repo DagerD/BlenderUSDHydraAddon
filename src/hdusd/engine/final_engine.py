@@ -154,10 +154,8 @@ class FinalEngine(Engine):
             usd_camera = UsdAppUtils.GetCameraAtPath(self.stage, scene.hdusd.final.nodetree_camera)
         else:
             usd_camera = UsdAppUtils.GetCameraAtPath(self.stage, Tf.MakeValidIdentifier(scene.camera.name))
-       
-        gf_camera = usd_camera.GetCamera()
-        renderer.SetCameraState(gf_camera.frustum.ComputeViewMatrix(),
-                                gf_camera.frustum.ComputeProjectionMatrix())
+
+        renderer.SetCameraPath(usd_camera.GetPath())
 
     def render(self, depsgraph):
         if not self.stage:

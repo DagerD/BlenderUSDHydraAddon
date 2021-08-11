@@ -269,6 +269,8 @@ void UsdImagingLiteEngine::SetRenderViewport(GfVec4d const & viewport)
 
 void UsdImagingLiteEngine::SetCameraPath(SdfPath const & id)
 {
+    _taskController->SetCameraPath(id);
+    _delegate->SetCameraForSampling(id);
 }
 
 void UsdImagingLiteEngine::SetCameraState(const GfMatrix4d & viewMatrix, const GfMatrix4d & projectionMatrix)
