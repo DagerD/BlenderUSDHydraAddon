@@ -112,17 +112,19 @@ public:
     USDIMAGINGLITE_API
     void SetRenderViewport(GfVec4d const& viewport);
 
-    /// Scene camera API
-    /// Set the scene camera path to use for rendering.
-    USDIMAGINGLITE_API
-    void SetCameraPath(SdfPath const& id);
-
     /// Free camera API
     /// Set camera framing state directly (without pointing to a camera on the 
     /// USD stage). The projection matrix is expected to be pre-adjusted for the
     /// window policy.
     USDIMAGINGLITE_API
     void SetCameraState(const GfMatrix4d& viewMatrix, const GfMatrix4d& projectionMatrix);
+
+    /// Free camera API
+    /// Set camera fStop, focusDistance, framing state directly (without pointing to a camera on the 
+    /// USD stage). The projection matrix is expected to be pre-adjusted for the
+    /// window policy.
+    USDIMAGINGLITE_API
+    void SetCameraStateFull(const GfMatrix4d& viewMatrix, const GfMatrix4d& projectionMatrix, float fStop, float focusDistance);
 
     /// @}
 

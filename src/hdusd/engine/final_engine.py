@@ -155,7 +155,12 @@ class FinalEngine(Engine):
         else:
             usd_camera = UsdAppUtils.GetCameraAtPath(self.stage, Tf.MakeValidIdentifier(scene.camera.name))
 
-        renderer.SetCameraPath(usd_camera.GetPath())
+        gf_camera = usd_camera.GetCamera()
+        renderer.SetCameraStateFull(gf_camera.frustum.ComputeViewMatrix(),
+                                gf_camera.frustum.ComputeProjectionMatrix(),
+                                gf_camera.fstop,
+                                gf_camera.focusDistance,
+                                )
 
     def render(self, depsgraph):
         if not self.stage:

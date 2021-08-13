@@ -295,6 +295,30 @@ void UsdImagingLiteEngine::SetCameraState(const GfMatrix4d & viewMatrix, const G
     
  }
 
+void UsdImagingLiteEngine::SetCameraStateFull(const GfMatrix4d& viewMatrix, const GfMatrix4d& projectionMatrix, float fStop, float focusDistance)
+{
+    SdfPath freeCameraId = _taskDataDelegate->GetDelegateID().AppendElementString("freeCamera");
+    HdCamera* cam = dynamic_cast<HdCamera*>(_renderIndex->GetSprim(HdPrimTypeTokens->camera, freeCameraId));
+    if (cam == nullptr) {
+        _renderIndex->InsertSprim(HdPrimTypeTokens->camera, _taskDataDelegate, freeCameraId);
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->windowPolicy, VtValue(CameraUtilFit));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->worldToViewMatrix, VtValue(viewMatrix));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->projectionMatrix, VtValue(projectionMatrix));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->fStop, VtValue(fStop));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->focusDistance, VtValue(focusDistance));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->clipPlanes, VtValue(std::vector<GfVec4d>()));
+
+        _renderTaskParams.camera = freeCameraId;
+    }
+    else {
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->worldToViewMatrix, VtValue(viewMatrix));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->projectionMatrix, VtValue(projectionMatrix));
+        _renderIndex->GetChangeTracker().MarkSprimDirty(freeCameraId, HdCamera::DirtyViewMatrix);
+        _renderIndex->GetChangeTracker().MarkSprimDirty(freeCameraId, HdCamera::DirtyProjMatrix);
+    }
+
+}
+
 TfTokenVector UsdImagingLiteEngine::GetRendererPlugins()
 {
     HfPluginDescVector pluginDescriptors;
