@@ -158,7 +158,7 @@ class FinalEngine(Engine):
         gf_camera = usd_camera.GetCamera()
         renderer.SetCameraStateFull(gf_camera.frustum.ComputeViewMatrix(),
                                 gf_camera.frustum.ComputeProjectionMatrix(),
-                                gf_camera.fstop,
+                                gf_camera.fStop,
                                 gf_camera.focusDistance,
                                 )
 

@@ -267,12 +267,6 @@ void UsdImagingLiteEngine::SetRenderViewport(GfVec4d const & viewport)
     _renderTaskParams.viewport = viewport;
 }
 
-void UsdImagingLiteEngine::SetCameraPath(SdfPath const & id)
-{
-    _taskController->SetCameraPath(id);
-    _delegate->SetCameraForSampling(id);
-}
-
 void UsdImagingLiteEngine::SetCameraState(const GfMatrix4d & viewMatrix, const GfMatrix4d & projectionMatrix)
 {
     SdfPath freeCameraId = _taskDataDelegate->GetDelegateID().AppendElementString("freeCamera");
