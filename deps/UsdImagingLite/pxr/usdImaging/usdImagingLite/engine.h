@@ -124,7 +124,8 @@ public:
     /// USD stage). The projection matrix is expected to be pre-adjusted for the
     /// window policy.
     USDIMAGINGLITE_API
-    void SetCameraStateFull(const GfMatrix4d& viewMatrix, const GfMatrix4d& projectionMatrix, float fStop, float focusDistance);
+    void SetCameraStateFull(const GfMatrix4d& viewMatrix, const GfMatrix4d& projectionMatrix, float fStop, float focusDistance,
+        float horizontalAperture, float horizontalApertureOffset, float verticalAperture, float verticalApertureOffset, float focalLength);
 
     /// @}
 

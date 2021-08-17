@@ -289,8 +289,8 @@ void UsdImagingLiteEngine::SetCameraState(const GfMatrix4d & viewMatrix, const G
     
  }
 
-void UsdImagingLiteEngine::SetCameraStateFull(const GfMatrix4d& viewMatrix, const GfMatrix4d& projectionMatrix, float fStop, float focusDistance, const GfRange1f& clippingRange,
-                                                float horizontalAperture, float horizontalApertureOffset, float verticalAperture, float verticalApertureOffset)
+void UsdImagingLiteEngine::SetCameraStateFull(const GfMatrix4d& viewMatrix, const GfMatrix4d& projectionMatrix, float fStop, float focusDistance,
+                                                float horizontalAperture, float horizontalApertureOffset, float verticalAperture, float verticalApertureOffset, float focalLength)
 {
     SdfPath freeCameraId = _taskDataDelegate->GetDelegateID().AppendElementString("freeCamera");
     HdCamera* cam = dynamic_cast<HdCamera*>(_renderIndex->GetSprim(HdPrimTypeTokens->camera, freeCameraId));
@@ -301,13 +301,12 @@ void UsdImagingLiteEngine::SetCameraStateFull(const GfMatrix4d& viewMatrix, cons
         _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->projectionMatrix, VtValue(projectionMatrix));
         _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->fStop, VtValue(fStop));
         _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->focusDistance, VtValue(focusDistance));
-        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->clippingRange, VtValue(clippingRange));
         _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->horizontalAperture, VtValue(horizontalAperture));
         _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->horizontalApertureOffset, VtValue(horizontalApertureOffset));
         _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->verticalAperture, VtValue(verticalAperture));
         _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->verticalApertureOffset, VtValue(verticalApertureOffset));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->focalLength, VtValue(focalLength));
         _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->clipPlanes, VtValue(std::vector<GfVec4d>()));
-
 
         _renderTaskParams.camera = freeCameraId;
     }
