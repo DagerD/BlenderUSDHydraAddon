@@ -153,8 +153,8 @@ class FinalEngine(Engine):
         if scene.hdusd.final.nodetree_camera != '' and scene.hdusd.final.data_source:
             usd_camera = UsdAppUtils.GetCameraAtPath(self.stage, scene.hdusd.final.nodetree_camera)
         else:
-            usd_camera = UsdAppUtils.GetCameraAtPath(self.stage, Tf.MakeValidIdentifier(scene.camera.name))
-
+            usd_camera = UsdAppUtils.GetCameraAtPath(self.stage, Tf.MakeValidIdentifier(scene.camera.data.name))
+       
         gf_camera = usd_camera.GetCamera()
         renderer.SetCameraStateFull(gf_camera.frustum.ComputeViewMatrix(),
                                 gf_camera.frustum.ComputeProjectionMatrix(),
