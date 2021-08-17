@@ -160,6 +160,12 @@ class FinalEngine(Engine):
                                 gf_camera.frustum.ComputeProjectionMatrix(),
                                 gf_camera.fStop,
                                 gf_camera.focusDistance,
+                                gf_camera.clippingRange,
+                                gf_camera.focalLength,
+                                gf_camera.horizontalAperture,
+                                gf_camera.horizontalApertureOffset,
+                                gf_camera.verticalAperture,
+                                gf_camera.verticalApertureOffset,
                                 )
 
     def render(self, depsgraph):
