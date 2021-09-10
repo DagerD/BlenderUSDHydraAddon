@@ -221,13 +221,9 @@ class CameraData:
 
         # TODO apply Depth Of Field settings to camera
         if self.dof_data:
-            pass
-            # usd_camera.set_focus_distance(self.dof_data[0])
-            # usd_camera.set_f_stop(self.dof_data[1])
-            # usd_camera.set_aperture_blades(self.dof_data[2])
-        else:
-            pass
-            # usd_camera.set_f_stop(None)
+            usd_camera.CreateFocusDistanceAttr(self.dof_data[0])
+            usd_camera.CreateFStopAttr(self.dof_data[1])
+            #usd_camera.CreateApertureBlades(self.dof_data[2])
 
         # usd_camera.set_transform(np.array(self.transform, dtype=np.float32))
 

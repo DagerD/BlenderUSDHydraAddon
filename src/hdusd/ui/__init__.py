@@ -50,6 +50,7 @@ from . import (
     usd_list,
     mx_nodes,
     object,
+    camera,
 )
 
 
@@ -110,6 +111,9 @@ register_classes, unregister_classes = bpy.utils.register_classes_factory([
 
     object.HDUSD_OBJECT_PT_usd_settings,
     object.HDUSD_OP_usd_object_show_hide,
+
+    camera.HDUSD_CAMERA_PT_dof,
+    camera.HDUSD_CAMERA_PT_dof_aperture,
 ])
 
 

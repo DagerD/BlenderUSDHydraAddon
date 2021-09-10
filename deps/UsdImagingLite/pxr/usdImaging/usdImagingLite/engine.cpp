@@ -267,10 +267,6 @@ void UsdImagingLiteEngine::SetRenderViewport(GfVec4d const & viewport)
     _renderTaskParams.viewport = viewport;
 }
 
-void UsdImagingLiteEngine::SetCameraPath(SdfPath const & id)
-{
-}
-
 void UsdImagingLiteEngine::SetCameraState(const GfMatrix4d & viewMatrix, const GfMatrix4d & projectionMatrix)
 {
     SdfPath freeCameraId = _taskDataDelegate->GetDelegateID().AppendElementString("freeCamera");
@@ -292,6 +288,36 @@ void UsdImagingLiteEngine::SetCameraState(const GfMatrix4d & viewMatrix, const G
     }
     
  }
+
+void UsdImagingLiteEngine::SetCameraStateFull(const GfMatrix4d& viewMatrix, const GfMatrix4d& projectionMatrix, float fStop, float focusDistance,
+                                                float horizontalAperture, float horizontalApertureOffset, float verticalAperture, float verticalApertureOffset, float focalLength)
+{
+    SdfPath freeCameraId = _taskDataDelegate->GetDelegateID().AppendElementString("freeCamera");
+    HdCamera* cam = dynamic_cast<HdCamera*>(_renderIndex->GetSprim(HdPrimTypeTokens->camera, freeCameraId));
+    if (cam == nullptr) {
+        _renderIndex->InsertSprim(HdPrimTypeTokens->camera, _taskDataDelegate, freeCameraId);
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->windowPolicy, VtValue(CameraUtilFit));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->worldToViewMatrix, VtValue(viewMatrix));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->projectionMatrix, VtValue(projectionMatrix));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->fStop, VtValue(fStop));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->focusDistance, VtValue(focusDistance));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->horizontalAperture, VtValue(horizontalAperture));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->horizontalApertureOffset, VtValue(horizontalApertureOffset));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->verticalAperture, VtValue(verticalAperture));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->verticalApertureOffset, VtValue(verticalApertureOffset));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->focalLength, VtValue(focalLength));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->clipPlanes, VtValue(std::vector<GfVec4d>()));
+
+        _renderTaskParams.camera = freeCameraId;
+    }
+    else {
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->worldToViewMatrix, VtValue(viewMatrix));
+        _taskDataDelegate->SetParameter(freeCameraId, HdCameraTokens->projectionMatrix, VtValue(projectionMatrix));
+        _renderIndex->GetChangeTracker().MarkSprimDirty(freeCameraId, HdCamera::DirtyViewMatrix);
+        _renderIndex->GetChangeTracker().MarkSprimDirty(freeCameraId, HdCamera::DirtyProjMatrix);
+    }
+
+}
 
 TfTokenVector UsdImagingLiteEngine::GetRendererPlugins()
 {
