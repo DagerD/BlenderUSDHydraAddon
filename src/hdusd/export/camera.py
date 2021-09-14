@@ -201,6 +201,10 @@ class CameraData:
             usd_camera.CreateHorizontalApertureOffsetAttr(lens_shift[0] * sensor_size[0])
             usd_camera.CreateVerticalApertureOffsetAttr(lens_shift[1] * sensor_size[1])
 
+            if self.dof_data is not None:
+                usd_camera.CreateFocusDistanceAttr(self.dof_data[0])
+                usd_camera.CreateFStopAttr(self.dof_data[1])
+
         elif self.mode == 'ORTHO':
             usd_camera.CreateProjectionAttr(UsdGeom.Tokens.orthographic)
 
@@ -218,12 +222,6 @@ class CameraData:
             pass
             # usd_camera.set_sensor_size(*self.sensor_size)
             # usd_camera.set_focal_length(self.focal_length)
-
-        # TODO apply Depth Of Field settings to camera
-        if self.dof_data:
-            usd_camera.CreateFocusDistanceAttr(self.dof_data[0])
-            usd_camera.CreateFStopAttr(self.dof_data[1])
-            #usd_camera.CreateApertureBlades(self.dof_data[2])
 
         # usd_camera.set_transform(np.array(self.transform, dtype=np.float32))
 
@@ -250,6 +248,10 @@ class CameraData:
             gf_camera.horizontalApertureOffset = lens_shift[0] * sensor_size[0]
             gf_camera.verticalApertureOffset = lens_shift[1] * sensor_size[1]
 
+            if self.dof_data is not None:
+                gf_camera.focusDistance = self.dof_data[0]
+                gf_camera.fStop = self.dof_data[1]
+
         elif self.mode == 'ORTHO':
             gf_camera.projection = Gf.Camera.Orthographic
 
@@ -268,13 +270,6 @@ class CameraData:
             pass
             # usd_camera.set_sensor_size(*self.sensor_size)
             # usd_camera.set_focal_length(self.focal_length)
-
-        if self.dof_data:
-            # TODO: store Depth Of Field camera settings
-            pass
-            # usd_camera.set_focus_distance(self.dof_data[0])
-            # usd_camera.set_f_stop(self.dof_data[1])
-            # usd_camera.set_aperture_blades(self.dof_data[2])
         else:
             pass
             # usd_camera.set_f_stop(None)
