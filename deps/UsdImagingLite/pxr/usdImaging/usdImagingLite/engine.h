@@ -30,6 +30,7 @@
 #include "pxr/imaging/hd/engine.h"
 #include "pxr/imaging/hd/rendererPlugin.h"
 #include "pxr/imaging/hdx/taskController.h"
+#include "pxr/imaging/cameraUtil/conformWindow.h"
 #include "pxr/usdImaging/usdImaging/delegate.h"
 #include "pxr/usdImaging/usdImagingGL/rendererSettings.h"
 
@@ -111,6 +112,12 @@ public:
     /// is the width and height of the viewport in pixels.
     USDIMAGINGLITE_API
     void SetRenderViewport(GfVec4d const& viewport);
+
+    USDIMAGINGLITE_API
+    void SetWindowPolicy(CameraUtilConformWindowPolicy policy);
+
+    USDIMAGINGLITE_API
+    void SetCameraPath(SdfPath const& id);
 
     /// Free camera API
     /// Set camera framing state directly (without pointing to a camera on the 
