@@ -142,24 +142,7 @@ class FinalEngine(Engine):
             usd_camera = UsdAppUtils.GetCameraAtPath(self.stage, Tf.MakeValidIdentifier(scene.camera.data.name))
 
         gf_camera = usd_camera.GetCamera()
-
         renderer.SetCameraPath(usd_camera.GetPath())
-        renderer.SetCameraState(gf_camera.frustum.ComputeViewMatrix(),
-                                gf_camera.frustum.ComputeProjectionMatrix()
-                                )
-
-
-
-        # renderer.SetCameraStateFull(gf_camera.frustum.ComputeViewMatrix(),
-        #                         gf_camera.frustum.ComputeProjectionMatrix(),
-        #                         gf_camera.fStop,
-        #                         gf_camera.focusDistance,
-        #                         gf_camera.horizontalAperture,
-        #                         gf_camera.horizontalApertureOffset,
-        #                         gf_camera.verticalAperture,
-        #                         gf_camera.verticalApertureOffset,
-        #                         gf_camera.focalLength,
-        #                         )
 
     def render(self, depsgraph):
         if not self.stage:
