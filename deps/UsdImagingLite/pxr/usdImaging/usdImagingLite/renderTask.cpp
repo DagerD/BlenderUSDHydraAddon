@@ -27,6 +27,7 @@
 #include "pxr/imaging/hd/renderIndex.h"
 #include "pxr/imaging/hd/renderBuffer.h"
 #include "pxr/imaging/hd/renderDelegate.h"
+#include "pxr/imaging/hdx/renderSetupTask.h"
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -71,11 +72,11 @@ void HdRenderTask::Sync(HdSceneDelegate* delegate,
     }
 
     if ((*dirtyBits) & HdChangeTracker::DirtyParams) {
-        HdRenderTaskParams params;
+        HdxRenderTaskParams params;
 
         auto value = delegate->Get(GetId(), HdTokens->params);
-        if (TF_VERIFY(value.IsHolding<HdRenderTaskParams>())) {
-            params = value.UncheckedGet<HdRenderTaskParams>();
+        if (TF_VERIFY(value.IsHolding<HdxRenderTaskParams>())) {
+            params = value.UncheckedGet<HdxRenderTaskParams>();
         }
 
         _aovBindings = params.aovBindings;
@@ -144,7 +145,7 @@ TfTokenVector const& HdRenderTask::GetRenderTags() const
 // VtValue Requirements
 // --------------------------------------------------------------------------- //
 
-std::ostream& operator<<(std::ostream& out, const HdRenderTaskParams& pv)
+std::ostream& operator<<(std::ostream& out, const HdxRenderTaskParams& pv)
 {
     out << "RenderTask Params:\n";
     out << "camera: " << pv.camera << '\n';
@@ -157,14 +158,14 @@ std::ostream& operator<<(std::ostream& out, const HdRenderTaskParams& pv)
     return out;
 }
 
-bool operator==(const HdRenderTaskParams& lhs, const HdRenderTaskParams& rhs)
+bool operator==(const HdxRenderTaskParams& lhs, const HdxRenderTaskParams& rhs)
 {
     return lhs.aovBindings == rhs.aovBindings &&
            lhs.camera == rhs.camera &&
            lhs.viewport == rhs.viewport;
 }
 
-bool operator!=(const HdRenderTaskParams& lhs, const HdRenderTaskParams& rhs)
+bool operator!=(const HdxRenderTaskParams& lhs, const HdxRenderTaskParams& rhs)
 {
     return !(lhs == rhs);
 }

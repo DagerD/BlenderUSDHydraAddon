@@ -30,6 +30,7 @@ class RenderSettings(bpy.types.PropertyGroup):
 
     @property
     def is_gl_delegate(self):
+        #return True
         return self.delegate == 'HdStormRendererPlugin'
 
     @property

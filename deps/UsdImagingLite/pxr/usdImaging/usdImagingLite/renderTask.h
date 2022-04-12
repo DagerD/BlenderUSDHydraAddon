@@ -27,6 +27,7 @@
 #include "pxr/imaging/hd/task.h"
 #include "pxr/imaging/hd/renderPass.h"
 #include "pxr/imaging/hd/renderPassState.h"
+#include "pxr/imaging/hdx/renderSetupTask.h"
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -78,9 +79,9 @@ struct HdRenderTaskParams
 };
 
 // VtValue requirements
-std::ostream& operator<<(std::ostream& out, const HdRenderTaskParams& pv);
-bool operator==(const HdRenderTaskParams& lhs, const HdRenderTaskParams& rhs);
-bool operator!=(const HdRenderTaskParams& lhs, const HdRenderTaskParams& rhs);
+std::ostream& operator<<(std::ostream& out, const HdxRenderTaskParams& pv);
+bool operator==(const HdxRenderTaskParams& lhs, const HdxRenderTaskParams& rhs);
+bool operator!=(const HdxRenderTaskParams& lhs, const HdxRenderTaskParams& rhs);
 
 PXR_NAMESPACE_CLOSE_SCOPE
 

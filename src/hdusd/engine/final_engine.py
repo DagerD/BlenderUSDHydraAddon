@@ -110,6 +110,10 @@ class FinalEngine(Engine):
 
         renderer.SetRenderViewport((0, 0, self.width, self.height))
         renderer.SetRendererAov('color')
+        renderer.SetRendererAov('depth')
+        renderer.SetRendererAov('primId')
+        renderer.SetRendererAov('instanceId')
+        renderer.SetRendererAov('elementId')
 
         # setting camera
         self._set_scene_camera(renderer, scene)
@@ -119,12 +123,21 @@ class FinalEngine(Engine):
             'Combined': np.empty((self.width, self.height, 4), dtype=np.float32)
         }
 
-        renderer.Render(self.stage.GetPseudoRoot(), params)
+        if scene.hdusd.final.data_source:
+            world_data = world.WorldData.init_from_stage(self.stage)
+        else:
+            world_data = world.WorldData.init_from_world(scene.world)
+
+        params.clearColor = world_data.clear_color
+
+
 
         time_begin = time.perf_counter()
         while True:
             if self.render_engine.test_break():
                 break
+
+            renderer.Render(self.stage.GetPseudoRoot(), params)
 
             percent_done = usd_utils.get_renderer_percent_done(renderer)
             self.notify_status(percent_done / 100,

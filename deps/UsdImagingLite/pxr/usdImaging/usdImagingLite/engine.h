@@ -31,6 +31,7 @@
 #include "pxr/imaging/hd/rendererPlugin.h"
 #include "pxr/imaging/hd/pluginRenderDelegateUniqueHandle.h"
 #include "pxr/imaging/hdx/taskController.h"
+#include "pxr/imaging/hdx/renderSetupTask.h"
 #include "pxr/usdImaging/usdImaging/delegate.h"
 #include "pxr/usdImaging/usdImagingGL/rendererSettings.h"
 
@@ -200,7 +201,8 @@ private:
     std::unique_ptr<HdEngine> _engine;
 
     HdRenderPassAovBindingVector _aovBindings;
-    HdRenderTaskParams _renderTaskParams;
+    //HdRenderTaskParams _renderTaskParams;
+    HdxRenderTaskParams _renderTaskParams;
 
     bool _isPopulated;
     HdRprimCollection _renderCollection;
@@ -209,7 +211,9 @@ private:
     // the task controller, and the usd imaging delegate.
     void _DeleteHydraResources();
 
+    SdfPath _GetRendererAovPath(TfToken const& aov) const;
 
+    std::unique_ptr<class HdxFreeCameraSceneDelegate> _freeCameraSceneDelegate;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE

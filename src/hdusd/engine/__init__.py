@@ -39,6 +39,12 @@ os.environ["HD_ENABLE_SCENE_INDEX_EMULATION"] = "0"
 sys.path.append(str(utils.LIBS_DIR / 'lib/python'))
 sys.path.append(str(utils.LIBS_DIR / 'python'))
 
+os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH') if os.environ.get('PYTHONPATH') else ""
+
+os.environ['PYTHONPATH'] = f"{os.environ['PYTHONPATH']};{str(utils.LIBS_DIR)}/lib/python"
+os.environ['RMAN_SHADERPATH'] = f"{os.environ['RMANTREE']}/lib/shaders;{str(utils.LIBS_DIR)}/plugin/usd/resources/shaders"
+os.environ['RMAN_RIXPLUGINPATH'] = f"{os.environ['RMANTREE']}/lib/plugins"
+os.environ['RMAN_TEXTUREPATH'] = f"{os.environ['RMANTREE']}/lib/textures;{os.environ['RMANTREE']}/lib/plugins;{str(utils.LIBS_DIR)}/plugin/usd"
 
 from . import engine, handlers
 

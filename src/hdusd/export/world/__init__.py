@@ -231,6 +231,6 @@ def get_clear_color(root_prim):
     color = light_prim.GetAttribute('inputs:color').Get()
     intensity = light_prim.GetAttribute('inputs:intensity').Get()
     transparency = light_prim.GetAttribute('inputs:transparency').Get()
-    clear_color = [c * intensity for c in color]
+    clear_color = [c * intensity * 4 for c in color]
     clear_color.append(transparency)
     return tuple(clear_color)

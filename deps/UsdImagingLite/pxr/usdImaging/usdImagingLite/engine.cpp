@@ -29,7 +29,8 @@
 #include "pxr/imaging/hd/rendererPlugin.h"
 #include "pxr/imaging/hd/rendererPluginRegistry.h"
 #include "pxr/imaging/hdx/taskController.h"
-
+#include "pxr/imaging/hdx/freeCameraSceneDelegate.h"
+#include "pxr/imaging/hdx/renderTask.h"
 
 #include "pxr/usdImaging/usdImaging/delegate.h"
 
@@ -84,6 +85,7 @@ bool UsdImagingLiteEngine::SetRendererAov(TfToken const &id)
     binding.aovName = id;
     binding.renderBufferId = renderBufferId;
     binding.aovSettings = aovDesc.aovSettings;
+    binding.clearValue = GfVec4f((0.5f, 0.5f, 0.5f, 1.0f));
     _renderTaskParams.aovBindings.push_back(binding);
 
     return true;
@@ -97,6 +99,13 @@ bool UsdImagingLiteEngine::GetRendererAov(TfToken const &id, void *buf)
     memcpy(buf, data, rBuf->GetWidth() * rBuf->GetHeight() * HdDataSizeOfFormat(rBuf->GetFormat()));
     rBuf->Unmap();
     return true;
+}
+
+SdfPath UsdImagingLiteEngine::_GetRendererAovPath(TfToken const& aov) const
+{
+    /*std::string identifier = std::string("aov_") + TfMakeValidIdentifier(aov.GetString());
+    return _renderDataDelegate->GetDelegateID().AppendElementString(TfToken(identifier));*/
+    return _renderDataDelegate->GetDelegateID().AppendElementString("aov_" + aov.GetString());
 }
 
 void UsdImagingLiteEngine::ClearRendererAovs()
@@ -134,8 +143,56 @@ void UsdImagingLiteEngine::Render(UsdPrim root, const UsdImagingLiteRenderParams
     _sceneDelegate->SetTime(params.frame);
 
     SdfPath renderTaskId = _renderDataDelegate->GetDelegateID().AppendElementString("renderTask");
-    _renderIndex->InsertTask<HdRenderTask>(_renderDataDelegate.get(), renderTaskId);
-    std::shared_ptr<HdRenderTask> renderTask = std::static_pointer_cast<HdRenderTask>(_renderIndex->GetTask(renderTaskId));
+    _renderIndex->InsertTask<HdxRenderTask>(_renderDataDelegate.get(), renderTaskId);
+    std::shared_ptr<HdxRenderTask> renderTask = std::static_pointer_cast<HdxRenderTask>(_renderIndex->GetTask(renderTaskId));
+
+    SdfPath renderBufferId = _GetRendererAovPath(HdAovTokens->color);
+    HdRenderBufferDescriptor rbDesc = _renderDataDelegate->GetParameter<HdRenderBufferDescriptor>(renderBufferId, _tokens->renderBufferDescriptor);
+
+    SdfPath depthBufferId = _GetRendererAovPath(HdAovTokens->depth);
+    HdRenderBufferDescriptor depthDesc = _renderDataDelegate->GetParameter<HdRenderBufferDescriptor>(depthBufferId, _tokens->renderBufferDescriptor);
+
+    SdfPath primBufferId = _GetRendererAovPath(HdAovTokens->primId);
+    HdRenderBufferDescriptor primDesc = _renderDataDelegate->GetParameter<HdRenderBufferDescriptor>(primBufferId, _tokens->renderBufferDescriptor);
+
+    SdfPath instanceBufferId = _GetRendererAovPath(HdAovTokens->instanceId);
+    HdRenderBufferDescriptor instanceDesc = _renderDataDelegate->GetParameter<HdRenderBufferDescriptor>(instanceBufferId, _tokens->renderBufferDescriptor);
+
+    SdfPath elementBufferId = _GetRendererAovPath(HdAovTokens->elementId);
+    HdRenderBufferDescriptor elementDesc = _renderDataDelegate->GetParameter<HdRenderBufferDescriptor>(elementBufferId, _tokens->renderBufferDescriptor);
+
+    _renderDataDelegate->SetParameter(renderBufferId, _tokens->renderBufferDescriptor, rbDesc);
+    _renderDataDelegate->SetParameter(depthBufferId, _tokens->renderBufferDescriptor, depthDesc);
+    _renderDataDelegate->SetParameter(primBufferId, _tokens->renderBufferDescriptor, primDesc);
+    _renderDataDelegate->SetParameter(instanceBufferId, _tokens->renderBufferDescriptor, instanceDesc);
+    _renderDataDelegate->SetParameter(elementBufferId, _tokens->renderBufferDescriptor, elementDesc);
+
+    _renderIndex->GetChangeTracker().MarkBprimDirty(renderBufferId, HdRenderBuffer::DirtyDescription);
+    _renderIndex->GetChangeTracker().MarkBprimDirty(depthBufferId, HdRenderBuffer::DirtyDescription);
+    _renderIndex->GetChangeTracker().MarkBprimDirty(primBufferId, HdRenderBuffer::DirtyDescription);
+    _renderIndex->GetChangeTracker().MarkBprimDirty(instanceBufferId, HdRenderBuffer::DirtyDescription);
+    _renderIndex->GetChangeTracker().MarkBprimDirty(elementBufferId, HdRenderBuffer::DirtyDescription);
+
+    for (size_t i = 0; i < _renderTaskParams.aovBindings.size(); ++i) {
+        if (_renderTaskParams.aovBindings[i].renderBufferId == renderBufferId) {
+            _renderTaskParams.aovBindings[i].clearValue = params.clearColor;
+        }
+        else if (_renderTaskParams.aovBindings[i].renderBufferId == depthBufferId) {
+            _renderTaskParams.aovBindings[i].clearValue = 0.0f;
+        }
+        else if (_renderTaskParams.aovBindings[i].renderBufferId == primBufferId) {
+            _renderTaskParams.aovBindings[i].clearValue = 0;
+        }
+        else if (_renderTaskParams.aovBindings[i].renderBufferId == instanceBufferId) {
+            _renderTaskParams.aovBindings[i].clearValue = 0;
+        }
+        else if (_renderTaskParams.aovBindings[i].renderBufferId == elementBufferId) {
+            _renderTaskParams.aovBindings[i].clearValue = 0;
+        }
+    }
+    
+    _renderTaskParams.depthFunc = HdCmpFuncLess;
+    _renderTaskParams.enableAlphaToCoverage = true;
 
     _renderDataDelegate->SetParameter(renderTaskId, HdTokens->params, _renderTaskParams);
     _renderIndex->GetChangeTracker().MarkTaskDirty(renderTaskId, HdChangeTracker::DirtyParams);
@@ -163,7 +220,7 @@ bool UsdImagingLiteEngine::IsConverged() const
 {
     TF_VERIFY(_renderIndex);
 
-    std::shared_ptr<HdRenderTask> renderTask = std::static_pointer_cast<HdRenderTask>(_renderIndex->GetTask(
+    std::shared_ptr<HdxRenderTask> renderTask = std::static_pointer_cast<HdxRenderTask>(_renderIndex->GetTask(
         _renderDataDelegate->GetDelegateID().AppendElementString("renderTask")));
     return renderTask->IsConverged();
 }
@@ -177,7 +234,7 @@ void UsdImagingLiteEngine::SetCameraState(const GfMatrix4d & viewMatrix, const G
 {
     TF_VERIFY(_renderIndex);
 
-    SdfPath freeCameraId = _renderDataDelegate->GetDelegateID().AppendElementString("freeCamera");
+    /*SdfPath freeCameraId = _renderDataDelegate->GetDelegateID().AppendElementString("freeCamera");
     if (_renderIndex->GetSprim(HdPrimTypeTokens->camera, freeCameraId)) {
         _renderIndex->RemoveSprim(HdPrimTypeTokens->camera, freeCameraId);
     }
@@ -187,7 +244,25 @@ void UsdImagingLiteEngine::SetCameraState(const GfMatrix4d & viewMatrix, const G
     _renderDataDelegate->SetParameter(freeCameraId, HdCameraTokens->projectionMatrix, VtValue(projectionMatrix));
     _renderDataDelegate->SetParameter(freeCameraId, HdCameraTokens->clipPlanes, VtValue(std::vector<GfVec4d>()));
 
-    _renderTaskParams.camera = freeCameraId;
+    _renderIndex->GetChangeTracker().MarkSprimDirty(freeCameraId, HdCamera::AllDirty);
+
+    _renderTaskParams.camera = freeCameraId;    
+
+    _freeCameraSceneDelegate->SetMatrices(viewMatrix, projectionMatrix);*/
+
+    /*std::shared_ptr<HdxRenderTask> renderTask = std::static_pointer_cast<HdxRenderTask>(_renderIndex->GetTask(
+        _renderDataDelegate->GetDelegateID().AppendElementString("renderTask")));*/
+    //_SetCameraParamForTasks(_freeCameraSceneDelegate->GetCameraId());
+
+    _freeCameraSceneDelegate->SetMatrices(viewMatrix, projectionMatrix);
+    _renderTaskParams.camera = _freeCameraSceneDelegate->GetCameraId();
+    //SdfPath renderTaskId = _renderDataDelegate->GetDelegateID().AppendElementString("renderTask");
+    //HdxRenderTaskParams params = _renderDataDelegate->GetParameter<HdxRenderTaskParams>(renderTaskId, HdTokens->params);
+    //SdfPath cam = _freeCameraSceneDelegate->GetCameraId();
+    //params.camera = cam;
+
+    //_renderDataDelegate->SetParameter(renderTaskId, HdTokens->params, _renderTaskParams);
+    //_renderIndex->GetChangeTracker().MarkTaskDirty(renderTaskId, HdChangeTracker::DirtyParams);
  }
 
 TfTokenVector UsdImagingLiteEngine::GetRendererPlugins()
@@ -249,6 +324,11 @@ bool UsdImagingLiteEngine::SetRendererPlugin(TfToken const & id)
     _renderDataDelegate = std::make_unique<HdRenderDataDelegate>(_renderIndex.get(),
         SdfPath::AbsoluteRootPath().AppendElementString("taskDataDelegate"));
 
+    const std::string pluginId = TfMakeValidIdentifier(_renderDelegate.GetPluginId().GetText());
+    const TfToken rendererName(TfStringPrintf("_UsdImaging_%s_%p", pluginId.c_str(), this));
+
+    _freeCameraSceneDelegate = std::make_unique<HdxFreeCameraSceneDelegate>(_renderIndex.get(), SdfPath::AbsoluteRootPath().AppendChild(rendererName));
+
     // The task context holds on to resources in the render
     // deletegate, so we want to destroy it first and thus
     // create it last.
@@ -304,6 +384,7 @@ void UsdImagingLiteEngine::_DeleteHydraResources()
     // Destroy objects in opposite order of construction.
     _engine = nullptr;
     _renderDataDelegate = nullptr;
+    _freeCameraSceneDelegate = nullptr;
     _sceneDelegate = nullptr;
     _renderIndex = nullptr;
     _renderDelegate = nullptr;
