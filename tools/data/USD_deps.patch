@@ -1,5 +1,5 @@
 diff --git a/build_scripts/build_usd.py b/build_scripts/build_usd.py
-index 7c27a2aa3..3c489bdd7 100644
+index 7c27a2aa3..917d01621 100644
 --- a/build_scripts/build_usd.py
 +++ b/build_scripts/build_usd.py
 @@ -689,7 +689,7 @@ if MacOS():
@@ -31,15 +31,26 @@ index 7c27a2aa3..3c489bdd7 100644
  elif MacOS():
      # On MacOS we experience various crashes in tests during teardown
      # starting with 2018 Update 2. Until we figure that out, we use
-@@ -874,7 +874,7 @@ def InstallTBB(context, force, buildArgs):
+@@ -874,8 +874,8 @@ def InstallTBB(context, force, buildArgs):
          InstallTBB_LinuxOrMacOS(context, force, buildArgs)
  
  def InstallTBB_Windows(context, force, buildArgs):
 -    TBB_ROOT_DIR_NAME = "tbb2018_20180822oss"
+-    with CurrentWorkingDirectory(DownloadURL(TBB_URL, context, force, 
 +    TBB_ROOT_DIR_NAME = "tbb"
-     with CurrentWorkingDirectory(DownloadURL(TBB_URL, context, force, 
++    with CurrentWorkingDirectory(DownloadURL(TBB_URL, context, force,
          TBB_ROOT_DIR_NAME)):
          # On Windows, we simply copy headers and pre-built DLLs to
+         # the appropriate location.
+@@ -1072,7 +1072,7 @@ BLOSC = Dependency("Blosc", InstallBLOSC, "include/blosc.h")
+ # not require additional dependencies such as GLFW. Note that version
+ # 6.1.0 does require CMake 3.3 though.
+ 
+-OPENVDB_URL = "https://github.com/AcademySoftwareFoundation/openvdb/archive/v6.1.0.zip"
++OPENVDB_URL = "https://github.com/AcademySoftwareFoundation/openvdb/archive/v9.0.0.zip"
+ 
+ def InstallOpenVDB(context, force, buildArgs):
+     with CurrentWorkingDirectory(DownloadURL(OPENVDB_URL, context, force)):
 @@ -1196,7 +1196,7 @@ OPENCOLORIO = Dependency("OpenColorIO", InstallOpenColorIO,
  ############################################################
  # OpenSubdiv
@@ -50,15 +61,6 @@ index 7c27a2aa3..3c489bdd7 100644
  def InstallOpenSubdiv(context, force, buildArgs):
      with CurrentWorkingDirectory(DownloadURL(OPENSUBDIV_URL, context, force)):
 
-@@ -1072,7 +1072,7 @@ BLOSC = Dependency("Blosc", InstallBLOSC, "include/blosc.h")
- # not require additional dependencies such as GLFW. Note that version
- # 6.1.0 does require CMake 3.3 though.
- 
--OPENVDB_URL = "https://github.com/AcademySoftwareFoundation/openvdb/archive/v6.1.0.zip"
-+OPENVDB_URL = "https://github.com/AcademySoftwareFoundation/openvdb/archive/v9.0.0.zip"
- 
- def InstallOpenVDB(context, force, buildArgs):
-     with CurrentWorkingDirectory(DownloadURL(OPENVDB_URL, context, force)):
      
 diff --git a/pxr/imaging/hioOpenVDB/vdbTextureData.h b/pxr/imaging/hioOpenVDB/vdbTextureData.h
 index e96a56d3f..c657f7232 100644
