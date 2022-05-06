@@ -45,25 +45,47 @@ in USD repository.
         # Temporary implements https://github.com/PixarAnimationStudios/USD/pull/1610
         # TODO: remove this after up USD to >= 2203 and implement their own fix
         #  https://github.com/PixarAnimationStudios/USD/commit/adfc04eea92b91965b0da68503539b079a5d30d9
-        check_call('git', 'apply', '--whitespace=nowarn', str(repo_dir / "tools/data/USD_MaterialX.patch"))
+        # check_call('git', 'apply', '--whitespace=nowarn', str(repo_dir / "tools/data/USD_MaterialX.patch"))
 
         # applying patch data/USD_deps.patch
         # fixes issues with building USD on python 3.10
         check_call('git', 'apply', str(repo_dir / "tools/data/USD_deps.patch"))
 
-        # modifying pxr/usdImaging/CMakeLists.txt
-        usd_imaging_lite_path = repo_dir / "deps/UsdImagingLite/pxr/usdImaging/usdImagingLite"
+        check_call('git', 'apply', str(repo_dir / "tools/data/usd.diff"))
 
-        usd_imaging_cmake = usd_dir / "pxr/usdImaging/CMakeLists.txt"
-        print("Modifying:", usd_imaging_cmake)
-        cmake_txt = usd_imaging_cmake.read_text()
-        usd_imaging_cmake.write_text(cmake_txt + f"""
-add_subdirectory("{usd_imaging_lite_path.absolute().as_posix()}" usdImagingLite)
-        """)
+        # modifying pxr/usdImaging/CMakeLists.txt
+#         usd_imaging_lite_path = repo_dir / "deps/UsdImagingLite/pxr/usdImaging/usdImagingLite"
+#
+#         usd_imaging_cmake = usd_dir / "pxr/usdImaging/CMakeLists.txt"
+#         print("Modifying:", usd_imaging_cmake)
+#         cmake_txt = usd_imaging_cmake.read_text()
+#         usd_imaging_cmake.write_text(cmake_txt + f"""
+# add_subdirectory("{usd_imaging_lite_path.absolute().as_posix()}" usdImagingLite)
+#         """)
 
         bin_usd_dir = bin_dir / "USD"
         build_args = [f'MATERIALX,-DMATERIALX_BUILD_PYTHON=ON -DMATERIALX_INSTALL_PYTHON=OFF '
                       f'-DMATERIALX_PYTHON_EXECUTABLE="{sys.executable}"']
+
+        blender_lib_folder = "C:/GPUOpen/Blender/lib/win64_vc15"
+
+        build_args.append(f'USD,-DBoost_COMPILER:STRING=-vc142 -DBoost_USE_MULTITHREADED=ON -DBoost_USE_STATIC_LIBS=ON '
+                          f'-DBoost_USE_STATIC_RUNTIME=OFF -DBOOST_ROOT="{blender_lib_folder}/boost" '
+                          f'-DBoost_NO_SYSTEM_PATHS=ON -DBoost_NO_BOOST_CMAKE=ON '
+                          f'-DBoost_ADDITIONAL_VERSIONS=1.78 -DBOOST_LIBRARYDIR="{blender_lib_folder}/boost/lib" '
+                          f'-DPYTHON_EXECUTABLE="{sys.executable}" -DPXR_ENABLE_PYTHON_SUPPORT=OFF '
+                          f'-DPXR_SET_INTERNAL_NAMESPACE="usdBlender" -DOPENSUBDIV_ROOT_DIR="{blender_lib_folder}/opensubdiv" '
+                          f'-DOpenImageIO_ROOT="{blender_lib_folder}/openimageio" '
+                          f'-DOPENEXR_LIBRARIES="{blender_lib_folder}/imath/lib/Imath_s.lib" '
+                          f'-DOPENEXR_INCLUDE_DIR="{blender_lib_folder}/imath/include" -DPXR_ENABLE_OSL_SUPPORT=OFF '
+                          f'-DPXR_BUILD_OPENCOLORIO_PLUGIN=OFF -DPXR_ENABLE_PTEX_SUPPORT=OFF -DPXR_BUILD_USD_TOOLS=OFF '
+                          f'-DCMAKE_DEBUG_POSTFIX="_d" -DBUILD_SHARED_LIBS=Off '
+                          f'-DPXR_MONOLITHIC_IMPORT="C:/GPUOpen/BlenderUSDHydraAddon/deps/USD/cmake/defaults/Version.cmake" '
+                          f'-DTBB_INCLUDE_DIRS="{blender_lib_folder}/tbb/include" '
+                          f'-DTBB_LIBRARIES="{blender_lib_folder}/tbb/lib/tbb.lib" '
+                          f'-DTbb_TBB_LIBRARY="{blender_lib_folder}/tbb/lib/tbb.lib" '
+                          f'-DTbb_TBB_LIBRARY="{blender_lib_folder}/tbb/lib/tbb_debug.lib" ')
+
         if build_var == 'relwithdebuginfo' and OS == 'Windows':
             # disabling optimization for debug purposes
             build_args.append(f'USD,-DCMAKE_CXX_FLAGS_RELWITHDEBINFO="/Od"')
@@ -76,6 +98,7 @@ add_subdirectory("{usd_imaging_lite_path.absolute().as_posix()}" usdImagingLite)
                      '--openvdb',
                      '--build-args', *build_args,
                      '--python',
+                     '--build-monolithic',
                      '--build-variant', build_var,
                      str(bin_usd_dir / "install"),
                      *args)

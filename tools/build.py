@@ -171,7 +171,7 @@ def main():
     ap.add_argument("-j", required=False, type=int, default=0,
                     help="Number of jobs run in parallel")
     ap.add_argument("-build-var", required=False, type=str, default="release",
-                    choices=('release', 'relwithdebuginfo'),    # TODO: add 'debug' build variant
+                    choices=('release', 'relwithdebuginfo', 'debug'),
                     help="Build variant for USD, HdRPR and dependencies. (default: release)")
     ap.add_argument("-clean", required=False, action="store_true",
                     help="Clean build dirs before start USD or HdRPR build")

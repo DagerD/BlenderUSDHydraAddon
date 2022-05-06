@@ -1,5 +1,5 @@
 diff --git a/build_scripts/build_usd.py b/build_scripts/build_usd.py
-index 3d1a5e25a..608b189e3 100644
+index 7c27a2aa3..3c489bdd7 100644
 --- a/build_scripts/build_usd.py
 +++ b/build_scripts/build_usd.py
 @@ -689,7 +689,7 @@ if MacOS():
@@ -22,18 +22,46 @@ index 3d1a5e25a..608b189e3 100644
  
  def InstallBoost_Helper(context, force, buildArgs):
      # Documentation files in the boost archive can have exceptionally
+@@ -858,7 +858,7 @@ BOOST = Dependency("boost", InstallBoost, BOOST_VERSION_FILE)
+ # Intel TBB
+ 
+ if Windows():
+-    TBB_URL = "https://github.com/oneapi-src/oneTBB/releases/download/2018_U6/tbb2018_20180822oss_win.zip"
++    TBB_URL = "https://github.com/oneapi-src/oneTBB/releases/download/v2020.3/tbb-2020.3-win.zip"
+ elif MacOS():
+     # On MacOS we experience various crashes in tests during teardown
+     # starting with 2018 Update 2. Until we figure that out, we use
+@@ -874,7 +874,7 @@ def InstallTBB(context, force, buildArgs):
+         InstallTBB_LinuxOrMacOS(context, force, buildArgs)
+ 
+ def InstallTBB_Windows(context, force, buildArgs):
+-    TBB_ROOT_DIR_NAME = "tbb2018_20180822oss"
++    TBB_ROOT_DIR_NAME = "tbb"
+     with CurrentWorkingDirectory(DownloadURL(TBB_URL, context, force, 
+         TBB_ROOT_DIR_NAME)):
+         # On Windows, we simply copy headers and pre-built DLLs to
+@@ -1196,7 +1196,7 @@ OPENCOLORIO = Dependency("OpenColorIO", InstallOpenColorIO,
+ ############################################################
+ # OpenSubdiv
+ 
+-OPENSUBDIV_URL = "https://github.com/PixarAnimationStudios/OpenSubdiv/archive/v3_4_3.zip"
++OPENSUBDIV_URL = "https://github.com/PixarAnimationStudios/OpenSubdiv/archive/v3_4_4.zip"
+ 
+ def InstallOpenSubdiv(context, force, buildArgs):
+     with CurrentWorkingDirectory(DownloadURL(OPENSUBDIV_URL, context, force)):
+
 diff --git a/pxr/imaging/hioOpenVDB/vdbTextureData.h b/pxr/imaging/hioOpenVDB/vdbTextureData.h
 index e96a56d3f..c657f7232 100644
 --- a/pxr/imaging/hioOpenVDB/vdbTextureData.h
 +++ b/pxr/imaging/hioOpenVDB/vdbTextureData.h
 @@ -34,6 +34,10 @@
- 
+
  #include <memory>
- 
+
 +#ifndef M_PI_2
 +    #define M_PI_2  1.57079632679489661923 // pi/2
 +#endif
 +
  PXR_NAMESPACE_OPEN_SCOPE
- 
+
  class HioOpenVDB_TextureData_DenseGridHolderBase;
