@@ -50,6 +50,16 @@ index 7c27a2aa3..3c489bdd7 100644
  def InstallOpenSubdiv(context, force, buildArgs):
      with CurrentWorkingDirectory(DownloadURL(OPENSUBDIV_URL, context, force)):
 
+@@ -1072,7 +1072,7 @@ BLOSC = Dependency("Blosc", InstallBLOSC, "include/blosc.h")
+ # not require additional dependencies such as GLFW. Note that version
+ # 6.1.0 does require CMake 3.3 though.
+ 
+-OPENVDB_URL = "https://github.com/AcademySoftwareFoundation/openvdb/archive/v6.1.0.zip"
++OPENVDB_URL = "https://github.com/AcademySoftwareFoundation/openvdb/archive/v9.0.0.zip"
+ 
+ def InstallOpenVDB(context, force, buildArgs):
+     with CurrentWorkingDirectory(DownloadURL(OPENVDB_URL, context, force)):
+     
 diff --git a/pxr/imaging/hioOpenVDB/vdbTextureData.h b/pxr/imaging/hioOpenVDB/vdbTextureData.h
 index e96a56d3f..c657f7232 100644
 --- a/pxr/imaging/hioOpenVDB/vdbTextureData.h
