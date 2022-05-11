@@ -97,7 +97,7 @@ in USD repository.
                      '--materialx',
                      '--openvdb',
                      '--build-args', *build_args,
-                     '--python',
+                     '--no-python',
                      '--build-monolithic',
                      '--build-variant', build_var,
                      str(bin_usd_dir / "install"),
