@@ -51,7 +51,7 @@ in USD repository.
         # fixes issues with building USD on python 3.10
         check_call('git', 'apply', str(repo_dir / "tools/data/USD_deps.patch"))
 
-        check_call('git', 'apply', str(repo_dir / "tools/data/usd.diff"))
+        check_call('git', 'apply', str(repo_dir / "tools/data/USD_Blender.patch"))
 
         # modifying pxr/usdImaging/CMakeLists.txt
 #         usd_imaging_lite_path = repo_dir / "deps/UsdImagingLite/pxr/usdImaging/usdImagingLite"
