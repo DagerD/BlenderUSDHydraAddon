@@ -69,22 +69,19 @@ in USD repository.
 
         blender_lib_folder = "C:/GPUOpen/Blender/lib/win64_vc15"
 
-        build_args.append(f'USD,-DBoost_COMPILER:STRING=-vc142 -DBoost_USE_MULTITHREADED=ON -DBoost_USE_STATIC_LIBS=ON '
-                          f'-DBoost_USE_STATIC_RUNTIME=OFF -DBOOST_ROOT="{blender_lib_folder}/boost" '
-                          f'-DBoost_NO_SYSTEM_PATHS=ON -DBoost_NO_BOOST_CMAKE=ON '
-                          f'-DBoost_ADDITIONAL_VERSIONS=1.78 -DBOOST_LIBRARYDIR="{blender_lib_folder}/boost/lib" '
-                          f'-DPYTHON_EXECUTABLE="{sys.executable}" -DPXR_ENABLE_PYTHON_SUPPORT=OFF '
-                          f'-DPXR_SET_INTERNAL_NAMESPACE="usdBlender" -DOPENSUBDIV_ROOT_DIR="{blender_lib_folder}/opensubdiv" '
-                          f'-DOpenImageIO_ROOT="{blender_lib_folder}/openimageio" '
+        build_args.append(f'USD,'
+                          f'-DPYTHON_EXECUTABLE="{sys.executable}" '
+                          f'-DPXR_SET_INTERNAL_NAMESPACE="usdBlender" '
+                          f'-DOPENEXR_INCLUDE_DIR="{blender_lib_folder}/imath/include" '
                           f'-DOPENEXR_LIBRARIES="{blender_lib_folder}/imath/lib/Imath_s.lib" '
-                          f'-DOPENEXR_INCLUDE_DIR="{blender_lib_folder}/imath/include" -DPXR_ENABLE_OSL_SUPPORT=OFF '
-                          f'-DPXR_BUILD_OPENCOLORIO_PLUGIN=OFF -DPXR_ENABLE_PTEX_SUPPORT=OFF -DPXR_BUILD_USD_TOOLS=OFF '
-                          f'-DCMAKE_DEBUG_POSTFIX="_d" -DBUILD_SHARED_LIBS=Off '
+                          f'-DPXR_ENABLE_OSL_SUPPORT=OFF '
+                          f'-DPXR_BUILD_OPENCOLORIO_PLUGIN=OFF '
+                          f'-DPXR_ENABLE_PTEX_SUPPORT=OFF '
+                          f'-DPXR_BUILD_USD_TOOLS=OFF '
+                          f'-DCMAKE_DEBUG_POSTFIX="_d" '
+                          f'-DBUILD_SHARED_LIBS=OFF '
                           f'-DPXR_MONOLITHIC_IMPORT="C:/GPUOpen/BlenderUSDHydraAddon/deps/USD/cmake/defaults/Version.cmake" '
-                          f'-DTBB_INCLUDE_DIRS="{blender_lib_folder}/tbb/include" '
-                          f'-DTBB_LIBRARIES="{blender_lib_folder}/tbb/lib/tbb.lib" '
-                          f'-DTbb_TBB_LIBRARY="{blender_lib_folder}/tbb/lib/tbb.lib" '
-                          f'-DTbb_TBB_LIBRARY="{blender_lib_folder}/tbb/lib/tbb_debug.lib" ')
+                          )
 
         if build_var == 'relwithdebuginfo' and OS == 'Windows':
             # disabling optimization for debug purposes
