@@ -13,7 +13,7 @@
 # limitations under the License.
 #********************************************************************
 from ..node_parser import NodeParser, Id
-
+import MaterialX
 
 class ShaderNodeOutputMaterial(NodeParser):
     nodegraph_path = ""
@@ -26,11 +26,20 @@ class ShaderNodeOutputMaterial(NodeParser):
         if surface is None:
             return None
 
-        if surface.type == 'BSDF':
+        if isinstance(surface, MaterialX.Node):
+            linked_input_type = surface.getType()
+            
+            if linked_input_type != 'surfaceshader':
+                return self.create_node('surfacematerial', 'material', {})
+
+        else:
+            linked_input_type = surface.type
+
+        if linked_input_type == 'BSDF':
             surface = self.create_node('surface', 'surfaceshader', {
                 'bsdf': surface,
             })
-        elif surface.type == 'EDF':
+        elif linked_input_type == 'EDF':
             surface = self.create_node('surface', 'surfaceshader', {
                 'edf': surface,
             })

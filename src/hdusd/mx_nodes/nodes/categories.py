@@ -22,7 +22,8 @@ from ...utils import title_str, code_str
 class MxNodeCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
-        return context.space_data.tree_type == 'hdusd.MxNodeTree'
+        return context.space_data.tree_type == 'ShaderNodeTree'
+        # return context.space_data.tree_type == 'hdusd.MxNodeTree'
 
 
 def get_node_categories():

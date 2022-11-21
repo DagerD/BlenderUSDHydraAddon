@@ -13,6 +13,7 @@
 # limitations under the License.
 #********************************************************************
 import math
+import MaterialX
 
 from ..node_parser import NodeParser
 
@@ -26,6 +27,9 @@ DEFAULT_WHITE_COLOR = (1.0, 1.0, 1.0)
 def enabled(val):
     if val is None:
         return False
+
+    if isinstance(val, MaterialX.Node):
+        return True
 
     if isinstance(val.data, float) and math.isclose(val.data, 0.0):
         return False

@@ -32,6 +32,7 @@ os.environ['MATERIALX_SEARCH_PATH'] = str(MX_LIBS_DIR)
 
 
 def set_param_value(mx_param, val, nd_type, nd_output=None):
+    from ..bl_nodes.node_parser import NodeItem
     if isinstance(val, mx.Node):
         param_nodegraph = mx_param.getParent().getParent()
         val_nodegraph = val.getParent()
@@ -73,10 +74,16 @@ def set_param_value(mx_param, val, nd_type, nd_output=None):
         else:
             mx_param.setValueString(str(val))
 
+    elif hasattr(val, 'data') and isinstance(val.data, mx.Node):
+        set_param_value(mx_param, val.data, nd_type, nd_output)
+
     else:
         mx_type = getattr(mx, title_str(nd_type), None)
         if mx_type:
-            val = mx_type(val)
+            if isinstance(val, NodeItem):
+                val = mx_type(val.data)    
+            else: 
+                val = mx_type(val)
         elif nd_type == 'float' and isinstance(val, tuple):
             val = val[0]
 
