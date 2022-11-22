@@ -20,6 +20,7 @@ from ...utils import title_str, code_str, LIBS_DIR, pass_node_reroute, BLENDER_V
 from ...utils import mx as mx_utils
 from . import log
 
+
 class MxNodeInputSocket(bpy.types.NodeSocket):
     bl_idname = 'hdusd.MxNodeInputSocket'
     bl_label = "MX Input Socket"
@@ -120,14 +121,9 @@ class MxNode(bpy.types.ShaderNode):
 
     def _input_prop_name(self, name):
         return f"nd_{self.data_type}_in_{name}"
-
-    def update_prop(self, context):
-        nodetree = self.id_data
-        nodetree.update_()
         
     def update(self):
         bpy.app.timers.register(self.mark_invalid_links)
-
 
     def mark_invalid_links(self):
         if not is_mx_node_valid(self):
@@ -155,21 +151,16 @@ class MxNode(bpy.types.ShaderNode):
             self.outputs[i].name = nd_output.getName()
 
     def init(self, context):
-        def init_():
-            nodedef = self.nodedef
+        nodedef = self.nodedef
 
-            for nd_input in mx_utils.get_nodedef_inputs(nodedef, False):
-                self.create_input(nd_input)
+        for nd_input in mx_utils.get_nodedef_inputs(nodedef, False):
+            self.create_input(nd_input)
 
-            for nd_output in nodedef.getOutputs():
-                self.create_output(nd_output)
+        for nd_output in nodedef.getOutputs():
+            self.create_output(nd_output)
 
-            if self._ui_folders:
-                self.update_ui_folders(context)
-
-        nodetree = self.id_data
-        init_()
-#         nodetree.no_update_call(init_)
+        if self._ui_folders:
+            self.update_ui_folders(context)
 
     def draw_buttons(self, context, layout):
         is_prop_area = context.area.type == 'PROPERTIES'
@@ -296,7 +287,7 @@ class MxNode(bpy.types.ShaderNode):
     # COMPUTE FUNCTION
     def compute(self, out_key, **kwargs):
         from ...bl_nodes.node_parser import NodeItem
-        
+
         log("compute", self, out_key)
 
         doc = kwargs['doc']
@@ -380,6 +371,7 @@ class MxNode(bpy.types.ShaderNode):
 
     def get_input_link(self, in_key: [str, int], **kwargs):
         """Returns linked parsed node or None if nothing is linked or not link is not valid"""
+        from ...bl_nodes import node_parser
 
         socket_in = self.inputs[in_key]
         if not socket_in.links:
@@ -401,9 +393,6 @@ class MxNode(bpy.types.ShaderNode):
 
             return self._compute_node(link.from_node, link.from_socket.name, **kwargs)
 
-
-        from ...bl_nodes import node_parser
-
         NodeParser_cls = node_parser.NodeParser.get_node_parser_cls(link.from_node.bl_idname)        
         output_type = NodeParser_cls.get_output_type(link.to_socket)
         if not NodeParser_cls:
@@ -411,34 +400,9 @@ class MxNode(bpy.types.ShaderNode):
             node_parser.NodeParser.cached_nodes[(link.from_node.name, link.from_socket.name, output_type)] = None
             return None
 
-        node_tree = None
-        material = None
-        for mat in bpy.data.materials:
-            if not mat.node_tree:
-                continue
+        node_parser_cls = NodeParser_cls(node_parser.Id(), kwargs['doc'], None, link.from_node, None, link.from_socket.name, output_type, {})
+        node_item = node_parser_cls.export()
 
-            node = mat.node_tree.nodes[link.from_node.name]
-                
-            if node:
-                node_tree = mat.node_tree
-                material = mat
-                break
-
-        # if isinstance(node, MxNode):
-        #     mx_node = node.compute(link.from_socket.name, **kwargs)
-        #     return mx_node
-
-        # ShaderNodeOutputMaterial(doc, material, output_node, obj)
-        node_parser = NodeParser_cls(node_parser.Id(), kwargs['doc'], material, link.from_node, None, link.from_socket.name, output_type, {})
-        node_item = node_parser.export()
-        # output_type = NodeParser_cls.get_output_type(socket_in)
-        # node_parser = NodeParser_cls(NodeParser_cls.id, NodeParser_cls.doc, NodeParser_cls.material, link.from_node, NodeParser_cls.object,
-        #                              link.from_socket.name, output_type, NodeParser_cls.cached_nodes, None, **NodeParser_cls.kwargs)
-
-        # node_item = node_parser.export()
-
-        # NodeParser_cls.cached_nodes[(link.from_node.name, link.from_socket.name, output_type)] = node_item        
-        # node_item = NodeParser_cls._export_node(link.from_node, link.from_socket.identifier, link.to_socket)
         return node_item
 
     def get_input_value(self, in_key: [str, int], **kwargs):
@@ -469,7 +433,6 @@ class MxNode(bpy.types.ShaderNode):
     @classmethod
     def poll(cls, tree):
         return tree.bl_idname == 'ShaderNodeTree'
-        # return tree.bl_idname == 'hdusd.MxNodeTree'
 
     def update_ui_folders(self, context):
         for i, nd_input in enumerate(mx_utils.get_nodedef_inputs(self.nodedef, False)):

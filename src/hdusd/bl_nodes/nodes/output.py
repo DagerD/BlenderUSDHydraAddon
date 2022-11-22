@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #********************************************************************
+from . import log
 from ..node_parser import NodeParser, Id
+
 import MaterialX
 
 class ShaderNodeOutputMaterial(NodeParser):
@@ -25,24 +27,13 @@ class ShaderNodeOutputMaterial(NodeParser):
         surface = self.get_input_link('Surface')
         if surface is None:
             return None
-
-        if isinstance(surface, MaterialX.Node):
-            linked_input_type = surface.getType()
             
-            if linked_input_type != 'surfaceshader':
-                return self.create_node('surfacematerial', 'material', {})
+        linked_input_type = surface.getType() if isinstance(surface, MaterialX.Node) else surface.type
 
-        else:
-            linked_input_type = surface.type
+        if linked_input_type != 'surfaceshader':
+            log.warn("Incorrect node tree to export: output node doesn't have correct input")
 
-        if linked_input_type == 'BSDF':
-            surface = self.create_node('surface', 'surfaceshader', {
-                'bsdf': surface,
-            })
-        elif linked_input_type == 'EDF':
-            surface = self.create_node('surface', 'surfaceshader', {
-                'edf': surface,
-            })
+            return None            
 
         result = self.create_node('surfacematerial', 'material', {
             'surfaceshader': surface,

@@ -20,6 +20,8 @@ import MaterialX as mx
 from ..utils import mx as mx_utils
 from ..utils import pass_node_reroute
 from ..mx_nodes.nodes import get_mx_node_cls
+from ..mx_nodes.nodes.base_node import MxNode
+
 from . import log
 
 
@@ -76,29 +78,6 @@ class NodeItem:
             return
 
         input = self.data.addInput(name, nd_input.getType())
-
-        from ..mx_nodes.nodes.base_node import MxNode
-        if isinstance(value, MxNode):
-            mx_node = value.compute(value.outputs[0].name, doc = self.nodegraph)
-            mx_nodegraph = mx_node.getParent()
-            node_path = mx_node.getNamePath()
-            nodedef = mx_node.getNodeDef()
-            
-            for mx_input in mx_node.getInputs():
-                mx_output_name = mx_input.getAttribute('output')
-                if not mx_output_name:
-                    continue
-
-                mx_output = mx_nodegraph.getOutput(mx_output_name)
-
-                out_name = mx_output.getAttribute('output')
-                if len(value.nodedef.getOutputs()) > 1 and out_name:
-                    new_node_output = value.outputs[out_name]
-                else:
-                    new_node_output = value.outputs[0]
-
-            mx_utils.set_param_value(input, mx_node, input.getType())
-            return
 
         mx_utils.set_param_value(input, val_data, input.getType())
 
@@ -325,34 +304,10 @@ class NodeParser:
         if node_item:
             return node_item
 
-        from ..mx_nodes.nodes.base_node import MxNode
         if isinstance(node, MxNode):
-            if output_type != node.data_type:
-                self.node.inputs[to_socket.name].links[0].is_valid = False
-                log.warn("Invalid link ignored", self.node, node.data_type, output_type)
-                return None
-
             mx_node = node.compute(out_key, doc=self.doc)
-            # mx_nodegraph = mx_utils.get_nodegraph_by_node_path(self.doc, node.mx_node_path, True)
-            # node_name = mx_utils.get_node_name_by_node_path(node.mx_node_path)
-            # nd_output = node.get_nodedef_output(out_key)
-            # mx_node = mx_nodegraph.addNode(node.nodedef.getNodeString(), node_name, nd_output.getType())
+
             return mx_node
-
-            # nodegraph = mx_utils.get_nodegraph_by_path(self.doc, self.nodegraph_path, True)
-            # mx_node = nodegraph.addNode(node.name, f"{node.name}_{self.id()}", node.data_type)
-            # if node.inputs:
-            #     for name, value in node.inputs.items():
-            #         val_data = value.data if isinstance(value, NodeItem) else value
-            #         nd_input = node.nodedef.getInput(name)
-            #         input = mx_node.addInput(name, nd_input.getType())
-                    # mx_utils.set_param_value(input, val_data, input.getType())
-
-        if isinstance(node, mx.Node):
-            if output_type != node.data_type:
-                self.node.inputs[to_socket.name].links[0].is_valid = False
-                log.warn("Invalid link ignored", self.node, node.data_type, output_type)
-                return None
 
         # getting corresponded NodeParser class
         NodeParser_cls = self.get_node_parser_cls(node.bl_idname)
@@ -367,6 +322,7 @@ class NodeParser:
         node_item = node_parser.export()
 
         self.cached_nodes[(node.name, out_key, output_type)] = node_item
+
         return node_item
 
     def _parse_val(self, val):

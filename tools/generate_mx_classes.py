@@ -156,8 +156,6 @@ def generate_property_code(mx_param, category):
         val_str = f'"{val}"' if isinstance(val, str) else str(val)
         prop_attr_strings.append(f"{name}={val_str}")
 
-    prop_attr_strings.append("update=MxNode.update_prop")
-
     if mx_type == 'filename' and category in ("texture2d", "texture3d"):
         prop_attr_strings.insert(0, "type=bpy.types.Image")
 
