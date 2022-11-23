@@ -18,12 +18,11 @@ import bpy
 import MaterialX as mx
 
 from ..utils import mx as mx_utils
-from ..utils import pass_node_reroute
+from ..utils import pass_node_reroute, logging
 from ..mx_nodes.nodes import get_mx_node_cls
 from ..mx_nodes.nodes.base_node import MxNode
 
-from . import log
-
+log = logging.Log('bl_nodes.node_parser')
 
 OUTPUT_TYPE = {'RGBA': 'color3',
                'VALUE': 'float',
@@ -72,11 +71,6 @@ class NodeItem:
 
         val_data = value.data if isinstance(value, NodeItem) else value
         nd_input = self.nodedef.getInput(name)
-
-        if isinstance(value, mx.Node) and nd_input.getType() != value.getType():
-            log.warn("Invalid link ignored", self.data.getName(), value.getName(), nd_input.getName(), self)
-            return
-
         input = self.data.addInput(name, nd_input.getType())
 
         mx_utils.set_param_value(input, val_data, input.getType())
@@ -305,6 +299,10 @@ class NodeParser:
             return node_item
 
         if isinstance(node, MxNode):
+            if output_type != node.data_type:
+                log.warn("Invalid link ignored", self.node, node.data_type, output_type)
+                return None
+
             mx_node = node.compute(out_key, doc=self.doc)
 
             return mx_node
