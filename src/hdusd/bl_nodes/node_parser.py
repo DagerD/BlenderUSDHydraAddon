@@ -298,15 +298,6 @@ class NodeParser:
         if node_item:
             return node_item
 
-        if isinstance(node, MxNode):
-            if output_type != node.data_type:
-                log.warn("Invalid link ignored", self.node, node.data_type, output_type)
-                return None
-
-            mx_node = node.compute(out_key, doc=self.doc)
-
-            return mx_node
-
         # getting corresponded NodeParser class
         NodeParser_cls = self.get_node_parser_cls(node.bl_idname)
         if not NodeParser_cls:
@@ -374,6 +365,10 @@ class NodeParser:
         link = pass_node_reroute(link)
         if not link:
             return None
+
+        if isinstance(link.from_node, MxNode):
+            mx_node = link.from_node.compute(link.from_socket.name, doc=self.doc)
+            return mx_node
 
         return self._export_node(link.from_node, link.from_socket.name, link.to_socket)
 
