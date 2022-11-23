@@ -388,19 +388,21 @@ class MxNode(bpy.types.ShaderNode):
 
         if isinstance(link.from_node, MxNode):
             if not is_mx_node_valid(link.from_node):
-                log.warn(f"Ignoring unsupported node {link.from_node.bl_idname}", link.from_node, link.from_node.id_data)
+                log.warn(f"Ignoring unsupported node {link.from_node.bl_idname}", link.from_node,
+                         link.from_node.id_data)
                 return None
 
             return self._compute_node(link.from_node, link.from_socket.name, **kwargs)
 
-        NodeParser_cls = node_parser.NodeParser.get_node_parser_cls(link.from_node.bl_idname)        
-        output_type = NodeParser_cls.get_output_type(link.to_socket)
+        NodeParser_cls = node_parser.NodeParser.get_node_parser_cls(link.from_node.bl_idname)
         if not NodeParser_cls:
             log.warn(f"Ignoring unsupported node {link.from_node.bl_idname}", link.from_node, self.material)
-            node_parser.NodeParser.cached_nodes[(link.from_node.name, link.from_socket.name, output_type)] = None
             return None
 
-        node_parser_cls = NodeParser_cls(node_parser.Id(), kwargs['doc'], None, link.from_node, None, link.from_socket.name, output_type, {})
+        output_type = NodeParser_cls.get_output_type(link.to_socket)
+
+        node_parser_cls = NodeParser_cls(node_parser.Id(), kwargs['doc'], None, link.from_node, None,
+                                         link.from_socket.name, output_type, {})
         node_item = node_parser_cls.export()
 
         return node_item

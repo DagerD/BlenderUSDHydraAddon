@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #********************************************************************
-from . import log
-from ..node_parser import NodeParser, Id
-
 import MaterialX
+
+from ..node_parser import NodeParser, Id, log
+
 
 class ShaderNodeOutputMaterial(NodeParser):
     nodegraph_path = ""

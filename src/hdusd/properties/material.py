@@ -18,6 +18,7 @@ import traceback
 
 from . import HdUSDProperties
 from ..mx_nodes.node_tree import MxNodeTree
+from ..mx_nodes.nodes.base_node import MxNode
 from ..bl_nodes.nodes import ShaderNodeOutputMaterial
 from ..usd_nodes import node_tree as usd_node_tree
 from ..engine.viewport_engine import ViewportEngineScene
@@ -42,9 +43,18 @@ class MaterialProperties(HdUSDProperties):
         if not material.node_tree:
             return None
 
-        return next((node for node in material.node_tree.nodes if
+        bl_output_node = next((node for node in material.node_tree.nodes if
                      node.bl_idname == ShaderNodeOutputMaterial.__name__ and
-                     node.is_active_output), None)
+                     node.is_active_output and node.inputs['Surface'].links), None)
+
+        if bl_output_node:
+            return bl_output_node
+
+        mx_output_node = next((node for node in material.node_tree.nodes if
+                     node.bl_idname == 'hdusd.MxNode_STD_surfacematerial' and
+                     node.inputs['surfaceshader'].links), None)
+
+        return mx_output_node
 
     def export(self, obj: bpy.types.Object) -> [mx.Document, None]:
         if self.mx_node_tree:
@@ -57,6 +67,10 @@ class MaterialProperties(HdUSDProperties):
             return None
 
         doc = mx.createDocument()
+
+        if isinstance(output_node, MxNode):
+            mx_node = output_node.compute('out', doc = doc)
+            return doc       
 
         node_parser = ShaderNodeOutputMaterial(doc, material, output_node, obj)
         if not node_parser.export():
